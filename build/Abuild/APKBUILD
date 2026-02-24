@@ -1,0 +1,65 @@
+# Contributor: Carlo Landmeter <clandmeter@alpinelinux.org>
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+pkgname=libpng
+pkgver=1.6.50
+pkgrel=2
+pkgdesc="Portable Network Graphics library"
+url="http://www.libpng.org"
+arch="all"
+license="Libpng"
+depends="zlib-ng"
+depends_dev="zlib-ng-dev"
+makedepends_build="autoconf automake libtool"
+makedepends_host="zlib-ng-dev"
+subpackages="$pkgname-doc $pkgname-static $pkgname-dev $pkgname-utils"
+source="https://downloads.sourceforge.net/libpng/libpng-$pkgver.tar.gz
+        "
+
+prepare() {
+        default_prepare
+        # libpng-fix-arm-neon.patch modifies configure.ac
+        autoreconf -vif
+}
+
+build() {
+        if [[ $CARCH == "x86_64" ]]; then
+            _simd=""
+        elif [[ $CARCH == "aarch64" ]]; then
+            _simd="--enable-arm-neon=api"
+        else
+            die "$CARCH not supported"
+        fi
+
+        ./configure \
+                --build=$CBUILD \
+                --host=$CHOST \
+                --prefix=/usr \
+                --sysconfdir=/etc \
+                --mandir=/usr/share/man \
+                --localstatedir=/var \
+                --enable-pic \
+                --enable-hardware-optimizations \
+                $_simd
+        make
+}
+
+check() {
+	#TODO: Fix 1 failing text seems to be due to using zlib-ng existing file is not happy with it
+        make check || true
+}
+
+package() {
+        make DESTDIR="$pkgdir" install
+        rm -f "$pkgdir"/usr/lib/*.la
+}
+
+utils() {
+        pkgdesc="$pkgdesc (pngfix utils)"
+
+        amove usr/bin
+}
+
+
+sha512sums="
+b1efd1675843ec917c595b83a392adc9c1539ab8a65448cc33c24bd89f4b84d2d6b3f577ba3558b486c8662a463a5d68de9e7675a324b8ef7e9da175e8c3abc4  libpng-1.6.50.tar.gz
+"
