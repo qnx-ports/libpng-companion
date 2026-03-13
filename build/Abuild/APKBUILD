@@ -2,7 +2,7 @@
 # Maintainer: Natanael Copa <ncopa@alpinelinux.org>
 pkgname=libpng
 pkgver=1.6.50
-pkgrel=2
+pkgrel=${pkgrel:-0}
 pkgdesc="Portable Network Graphics library"
 url="http://www.libpng.org"
 arch="all"
@@ -60,6 +60,7 @@ utils() {
 }
 
 
+options="$options ${DISABLE_CHECK:+!check}"
 sha512sums="
 b1efd1675843ec917c595b83a392adc9c1539ab8a65448cc33c24bd89f4b84d2d6b3f577ba3558b486c8662a463a5d68de9e7675a324b8ef7e9da175e8c3abc4  libpng-1.6.50.tar.gz
 "
